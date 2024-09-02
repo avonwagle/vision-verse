@@ -15,6 +15,10 @@ const config: Config = {
       },
     },
   },
+  fontFamily: {
+    wendy: ['"Wendy One"', 'sans-serif'],
+  },
+
   plugins: [],
 };
 export default config;
