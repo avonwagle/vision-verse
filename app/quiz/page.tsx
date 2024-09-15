@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
-import LanguageSelector from "../components/languageselector";
 
 const wendyone = Wendy_One({
   weight: "400",
@@ -33,9 +32,7 @@ const QuizPage: React.FC = () => {
               alt="Start"
               className="w-full h-full object-cover"
             />
-            <div className="absolute top-4 left-4 z-10">
-              <LanguageSelector />
-            </div>
+            
             <div className="absolute inset-0 flex flex-col justify-center items-center">
               <div className="text-center text-white space-y-6 pt-20">
                 <h1 className={`text-5xl font-bold ${wendyone.className}`}>
@@ -67,11 +64,7 @@ const QuizPage: React.FC = () => {
                 </h1>
               </div>
             </div>
-            <div className="absolute bottom-0 w-full">
-              <footer className="bg-[#21322E] text-white py-2 text-center w-full">
-                <p className="text-sm">© 2024 Visionverse. All rights reserved.</p>
-              </footer>
-            </div>
+          
           </div>
         </div>
       </div>

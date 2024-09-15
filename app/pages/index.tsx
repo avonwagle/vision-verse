@@ -1,9 +1,9 @@
-// pages/index.tsx
 "use client";
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
 import LanguageSelector from "../components/languageselector";
+import { useState, useRef } from "react";
 
 const wendyone = Wendy_One({
   weight: "400",
@@ -12,9 +12,18 @@ const wendyone = Wendy_One({
 
 const MainPage: React.FC = () => {
   const router = useRouter();
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleClick = () => {
-    router.push("/onboarding"); // Navigates to /onboard1
+    router.push("/onboarding"); // Navigates to /onboarding
+  };
+
+  const handleMuteClick = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
   };
 
   return (
@@ -39,14 +48,14 @@ const MainPage: React.FC = () => {
             <div className="absolute inset-0 flex flex-col justify-center items-center p-6 top-56">
               <div className="text-center text-white space-y-6">
                 <h1 className={`text-4xl font-bold ${wendyone.className}`}>
-                  If I entered a dog
+                  If I Entered A Dog
                   <br />
-                  beauty pageant, I
+                  Beauty Pageant, I
                   <br />
-                  would be...
+                  Would Be...
                 </h1>
                 <p className="text-md">
-                  Discover the Breed that Speaks to Your Soul
+                  Discover The Breed That Speaks To Your Soul
                 </p>
                 <div className="relative flex justify-center items-center top-20">
                   <img
@@ -76,6 +85,7 @@ const MainPage: React.FC = () => {
             </div>
           </div>
         </div>
+       
       </div>
     </>
   );

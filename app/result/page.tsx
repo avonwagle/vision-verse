@@ -9,17 +9,99 @@ const wendyone = Wendy_One({
   subsets: ["latin"],
 });
 
+// Priority order for resolving ties in occurrences
+const priorityOrder = [9, 6, 4, 7, 3, 1, 2, 8, 5];
+
+// Map numbers to image paths
+const imageMap: Record<number, string> = {
+  1: "/output/option1.png",
+  2: "/output/option2.png",
+  3: "/output/option3.png",
+  4: "/output/option4.png",
+  5: "/output/option5.png",
+  6: "/output/option6.png",
+  7: "/output/option7.png",
+  8: "/output/option8.png",
+  9: "/output/option9.png",
+};
+
+// Example questions
+const questions = [
+  "Question 1 text goes here",
+  "Question 2 text goes here",
+  "Question 3 text goes here",
+  "Question 4 text goes here",
+  "Question 5 text goes here",
+  "Question 6 text goes here",
+  "Question 7 text goes here",
+  "Question 8 text goes here",
+];
+
 const ResultPage: React.FC = () => {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<number[][]>([]);
+  const [occurrences, setOccurrences] = useState<Record<number, number>>({});
+  const [highestOccurrenceNumber, setHighestOccurrenceNumber] = useState<number | null>(null);
+  const [showMoreResults, setShowMoreResults] = useState<boolean>(false); // Control visibility of more results
 
   useEffect(() => {
-    const options = [];
+    const options: number[][] = [];
+    let numberCount: Record<number, number> = {};
+
     for (let i = 1; i <= 8; i++) {
       const option = localStorage.getItem(`question${i}`);
-      if (option) options.push(option);
+      if (option) {
+        const parsedOption = JSON.parse(option); // Assuming options are stored as arrays of numbers
+        options.push(parsedOption);
+
+        // Count occurrences of each number
+        parsedOption.forEach((num: number) => {
+          if (numberCount[num]) {
+            numberCount[num]++;
+          } else {
+            numberCount[num] = 1;
+          }
+        });
+      }
     }
+
     setSelectedOptions(options);
+    setOccurrences(numberCount);
+
+    // Find the highest occurrence count
+    const maxCount = Math.max(...Object.values(numberCount));
+
+    // Get the numbers that have the highest occurrence
+    const highestNumbers = Object.keys(numberCount)
+      .filter((num) => numberCount[Number(num)] === maxCount)
+      .map(Number);
+
+    // Find the highest-priority number from the tie-breaking order
+    const highestPriorityNumber = priorityOrder.find((num) => highestNumbers.includes(num)) ?? null;
+
+    setHighestOccurrenceNumber(highestPriorityNumber);
   }, []);
+
+  // Determine the image source based on the highest occurrence number
+  const imageSrc = highestOccurrenceNumber ? imageMap[highestOccurrenceNumber] : "/images/quiz8.png";
+
+  // Share functionality (for simplicity, using navigator.share API)
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: "Quiz Result",
+        text: "Check out my quiz result!",
+        url: window.location.href,
+      });
+    } else {
+      alert("Sharing is not supported on this browser.");
+    }
+  };
+
+  // Restart the quiz
+  const handleRestart = () => {
+    localStorage.clear(); // Clear localStorage to reset quiz
+    window.location.href = "/quiz"; // Redirect to quiz page (change this path as needed)
+  };
 
   return (
     <>
@@ -29,38 +111,63 @@ const ResultPage: React.FC = () => {
           rel="stylesheet"
         />
       </Head>
-      <div className="relative min-h-screen bg-blue-500 flex items-center justify-center">
+      <div className="relative min-h-screen flex items-center bg-green-500 justify-center overflow-hidden">
         <div className="relative w-full max-w-md h-screen bg-white shadow-md overflow-hidden flex flex-col">
           <div className="relative flex-grow">
-         
+            <img
+              src={imageSrc} // Dynamically set image source
+              alt="Quiz"
+              className="absolute inset-0 w-full h-full"
+            />
+            
             <div className="absolute inset-0 flex flex-col justify-center items-center p-6 mt-60">
-              <div className="text-center text-balck space-y-6 pt-20">
-                <h2 className={`text-3xl font-bold ${wendyone.className}`}>
-                  Your Selected Options
-                </h2>
+              <div className="text-center text-white space-y-6 pt-20">
+                {/* Additional content */}
               </div>
-              <div className="text-center text-black space-y-6 mt-20">
-                {selectedOptions.length > 0 ? (
-                  <ul className="list-disc text-xl">
-                    {selectedOptions.map((option, index) => (
-                      <li key={index} className={`font-bold ${wendyone.className}`}>
-                        Question {index + 1}: {option}
+            </div>
+          </div>
+
+          {/* Buttons positioned at the bottom, overlapping the background image */}
+          <div className="absolute bottom-0 w-full flex justify-around items-center p-4 mb-3">
+          <button
+              onClick={handleShare}
+              className="border border-white text-white px-7 py-2 rounded-full bg-transparent hover:bg-white hover:text-green-500 transition-colors ml-4"
+            >
+              Share
+            </button>
+            
+            <button
+              onClick={() => setShowMoreResults(!showMoreResults)} // Toggle more results
+              className="border border-white text-white px-4 py-2 rounded-full bg-transparent hover:bg-white hover:text-green-500 transition-colors ml-3 mr-3"
+            >
+              More Results
+            </button>
+          
+            <button
+              onClick={handleRestart}
+              className="border border-white text-white px-4 py-2 rounded-full bg-transparent hover:bg-white hover:text-green-500 transition-colors "
+            >
+              Play Again
+            </button>
+          </div>
+
+          {/* Show selected options with questions when 'More Results' is clicked */}
+          {showMoreResults && (
+            <div className="p-4 bg-white absolute bottom-0 w-full max-h-60 overflow-y-auto">
+              {selectedOptions.map((options, index) => (
+                <div key={index} className="my-4 p-2 border-b">
+                  <h3 className="font-bold text-green-700 mb-2">{questions[index]}</h3>
+                  <ul className="list-disc list-inside">
+                    {options.map((option, i) => (
+                      <li key={i} className="text-gray-700">
+                        Option {option} selected
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <p className={`text-3xl font-bold ${wendyone.className}`}>
-                    No options selected
-                  </p>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
-            <div className="absolute bottom-0 w-full">
-              <footer className="bg-[#21322E] text-white py-2 text-center w-full">
-                <p className="text-sm">© 2024 Visionverse. All rights reserved.</p>
-              </footer>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </>

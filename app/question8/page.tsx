@@ -13,9 +13,26 @@ const QuizPage: React.FC = () => {
   const router = useRouter();
 
   const handleOptionClick = (option: string) => {
-    // Store the selected option in localStorage
-    localStorage.setItem('question8', option);
-    router.push("/result"); // Navigate to the next page
+        // Store the selected option in localStorage
+        let numbersToSave: number[] = [];
+
+        if (option === 'Option 1') {
+          // Save numbers 1, 3, 6 for Option 1
+          numbersToSave = [1, 3,5];
+        } else if (option === 'Option 2') {
+          // Save numbers 2, 4, 9 for Option 2
+          numbersToSave = [2,8,9];
+        } else if (option === 'Option 3') {
+          // Save numbers 2, 4, 9 for Option 3
+          numbersToSave = [2,9];
+        } else if (option === 'Option 4') {
+          // Save numbers 2, 4, 9 for Option 4
+          numbersToSave = [7,8];
+        }
+    
+        // Store the selected numbers in localStorage
+        localStorage.setItem('question8', JSON.stringify(numbersToSave));
+    router.push("/output"); // Navigate to the next page
   };
 
   return (
@@ -30,57 +47,63 @@ const QuizPage: React.FC = () => {
         <div className="relative w-full max-w-md h-screen bg-white shadow-md overflow-hidden flex flex-col">
           <div className="relative flex-grow">
             <img
-              src="/images/quiz8.png" // Make sure this image exists in your public folder
+              src="/images/quiz8.png" // Ensure this image is in your public folder
               alt="Quiz"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 flex flex-col justify-center items-center p-6 mt-60">
-              <div className="text-center text-white space-y-6 pt-20">
-                {/* You can add any additional content here */}
+            
+            {/* Question at the top */}
+            <div className="absolute inset-0 flex flex-col justify-start items-center p-6 -mt-3">
+              <div className="text-center text-white space-y-6 mt-8">
+                <h2 className={`text-3xl font-bold ${wendyone.className}`}>
+                If you have the opportunity to participate in an activity with your dog, what interests you the most?
+                </h2>
               </div>
-              
-              <div className="text-center text-white space-y-6 mt-20">
-                <h2 className={`text-2xl font-bold ${wendyone.className}`}>
-                If you have the opportunity to participate in an activity with your dog, what interests you the most?                </h2>
-              </div>
-              
-              <div className="flex justify-around space-x-4 mt-16 mb-5">
-                <div
-                  onClick={() => handleOptionClick('Option 1')}
-                  className="cursor-pointer p-4 bg-[#062106] border-2 border-yellow-100 rounded-lg text-white text-center flex-1 px-3 mx-3 transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E]"
+            </div>
+
+            {/* Options: Adjusted to the left and right sides */}
+            <div className="absolute inset-x-0 bottom-20 flex flex-col justify-end items-center space-y-6 mb-6">
+              <div className="flex justify-between items-center w-full px-6">
+              <div
+                  onClick={() => handleOptionClick("Option 1")}
+                  className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
                 >
-                  <p className="text-sm">Training courses</p>
+                  <p>Training courses</p>
                 </div>
                 <div
-                  onClick={() => handleOptionClick('Option 2')}
-                  className="cursor-pointer p-4 bg-[#062106] border-2 border-yellow-100 rounded-lg text-white text-center flex-1 px-3 mx-3 transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E]"
+                  onClick={() => handleOptionClick("Option 2")}
+                  className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
                 >
-                  <p className="text-sm">Dog gatherings</p>
+                 <p>Dog gatherings</p>
                 </div>
               </div>
-              <div className="flex justify-around space-x-4 mb-10">
-                <div
-                  onClick={() => handleOptionClick('Option 3')}
-                  className="cursor-pointer p-4 bg-[#062106] border-2 border-yellow-100 rounded-lg text-white text-center flex-1 px-3 mx-3 transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E]"
+
+              <div className="flex justify-between items-center w-full px-6 pt-5">
+              <div
+                  onClick={() => handleOptionClick("Option 3")}
+                  className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
                 >
-                  <p className="text-sm">Charity run</p>
+                  <p>
+                 Charity run
+                  </p>
                 </div>
                 <div
-                  onClick={() => handleOptionClick('Option 4')}
-                  className="cursor-pointer p-4 bg-[#062106] border-2 border-yellow-100 rounded-lg text-white text-center flex-1 px-3 mx-3 transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E]"
+                  onClick={() => handleOptionClick("Option 4")}
+                  className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
                 >
-                  <p className="text-sm">Adventure hiking</p>
+                  <p>
+                 Adventure hiking
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="absolute bottom-0 w-full">
-              <footer className="bg-[#21322E] text-white py-2 text-center w-full">
-                <p className="text-sm">© 2024 Visionverse. All rights reserved.</p>
-              </footer>
-            </div>
+
+           
           </div>
         </div>
       </div>
+
+     
     </>
   );
 };

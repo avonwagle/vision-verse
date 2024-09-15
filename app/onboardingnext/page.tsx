@@ -34,46 +34,45 @@ const StartPage: React.FC = () => {
               alt="Different Start"
               className="w-full h-full object-cover"
             />
+            
             {/* Overlay Content */}
             <div className="absolute inset-0 flex flex-col justify-center items-center p-6 space-y-6">
               {/* Main Title */}
 
               {/* Instruction Text */}
-              <p className="text-md text-white text-center px-4">
+              <p className="text-md text-white text-center px-4 ">
                 Discover the beauty within every moment. Our personalized card is a small treasure, uniquely crafted to brighten your day and remind you of the extraordinary in the ordinary.
               </p>
               
               {/* Top SVG Image */}
-              <img src="/images/dog.png" alt="Instruction 1" className="w-50 h-56" />
+              <img src="/images/dog.png" alt="Instruction 1" className="w-70 h-80" />
               
               {/* SVG Images with Text */}
-              <div className="flex justify-between w-full max-w-md mt-6 px-4 mr-5">
+              
+              <div className="flex justify-between w-full max-w-md mt-20 px-4 mr-5">
                 <div className="flex flex-col items-center">
-                  <img src="/images/circular_left.png" alt="Left Image" className="w-24 h-24" />
-                  <p className="text-center text-xs mt-2 text-white">
+                  <img src="/images/circular_left.png" alt="Left Image" className="w-30 h-30" />
+                  <p className="text-center text-sm mt-2 mr-5 text-white">
                     Personality assessments deepen understanding for improved relationships
                   </p>
                 </div>
                 <div className="flex flex-col items-center ml-5">
-                  <img src="/images/circular_right.png" alt="Right Image" className="w-24 h-24" />
-                  <p className="text-center text-xs mt-2 text-white">
+                  <img src="/images/circular_right.png" alt="Right Image" className="w-30 h-30" />
+                  <p className="text-center text-sm mt-2 text-white">
                     Test results help personal development and enhance communication
                   </p>
                 </div>
               </div>
+              
 
               {/* Final SVG Image */}
-              <div className="absolute bottom-10 w-full flex justify-center">
+              <div className="absolute bottom-5 w-full flex justify-center">
                 <img src="/svg/onboard2.svg" alt="Instruction 3" className="w-20 h-20 mt-6" />
               </div>
             </div>
 
             {/* Footer Section */}
-            <div className="absolute bottom-0 w-full">
-              <footer className="bg-[#21322E] text-white py-2 text-center w-full">
-                <p className="text-sm">© 2024 Visionverse. All rights reserved.</p>
-              </footer>
-            </div>
+          
           </div>
         </div>
       </div>
