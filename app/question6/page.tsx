@@ -3,30 +3,101 @@ import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
 
+import { useEffect } from "react";
+import { usePageTracking } from "../hooks/usePageTracking";
+
 const wendyone = Wendy_One({
   weight: "400",
   subsets: ["latin"],
 });
 
+const getUniqueUserId = () => {
+  let userId = localStorage.getItem('uniqueUserId');
+  return userId;
+};
+const userId = getUniqueUserId();  // Get or create a unique user ID
+
+
 const QuizPage: React.FC = () => {
   const router = useRouter();
-
+  usePageTracking('/question6');  // This tracks the question 6 page
   const handleOptionClick = (option: string) => {
     let numbersToSave: number[] = [];
+    let answer='';
 
     if (option === "Option 1") {
       numbersToSave = [1, 5];
+      answer='Strong functionality, intellectual development';
     } else if (option === "Option 2") {
       numbersToSave = [2, 9];
+      answer='Promoting interaction and deepening relationships';
     } else if (option === "Option 3") {
       numbersToSave = [3, 6];
+      answer='Durable and simple, long-lasting use';
     } else if (option === "Option 4") {
       numbersToSave = [4, 7];
+      answer='Innovative and interesting, sparking curiosity';
     }
 
     localStorage.setItem("question6", JSON.stringify(numbersToSave));
-    router.push("/question7"); // Navigate to the next page
+
+    // Send response to the backend
+    fetch('/api/question-response', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,  // Replace with the actual userId
+        questionId: 'When selecting toys for your dog, which type do you prefer?',
+        selectedAnswer: answer
+      }),
+    });
+  
+    router.push("/question7");
   };
+  
+  // Page view tracking
+  useEffect(() => {
+    const userId = getUniqueUserId();  // Get or create a unique user ID
+    const deviceType = navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop';
+    const channel = document.referrer.includes('google') ? 'organic' : 'direct';
+    
+    // Measure page load response time
+    const startTime = performance.now();
+
+    const sendPageView = () => {
+      const responseTime = performance.now() - startTime; // Calculate response time
+      fetch('/api/page-views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Question 6 Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+
+      fetch('/api/page-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Question 6 Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+    };
+
+    // Debounce the call to avoid multiple requests
+    const timeoutId = setTimeout(sendPageView, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   return (
     <>

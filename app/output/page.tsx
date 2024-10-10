@@ -3,17 +3,67 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
+import { usePageTracking } from "../hooks/usePageTracking";
+import { useEffect } from "react";
 
 const wendyone = Wendy_One({
   weight: "400",
   subsets: ["latin"],
 });
+const getUniqueUserId = () => {
+  let userId = localStorage.getItem('uniqueUserId');
+  return userId;
+};
+const userId = getUniqueUserId();  // Get or create a unique user ID
 
 const OutputPage: React.FC = () => {
   const router = useRouter();
 
+  useEffect(() => {
+    const userId = getUniqueUserId();  // Get or create a unique user ID
+    const deviceType = navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop';
+    const channel = document.referrer.includes('google') ? 'organic' : 'direct';
+    
+    // Measure page load response time
+    const startTime = performance.now();
+
+    const sendPageView = () => {
+      const responseTime = performance.now() - startTime; // Calculate response time
+      fetch('/api/page-views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Output Waiting Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+
+      fetch('/api/page-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Output Waiting Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+    };
+
+    // Debounce the call to avoid multiple requests
+    const timeoutId = setTimeout(sendPageView, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   const handleClick = () => {
-    router.push("/result"); // Navigates to /start
+    router.push("/result"); // Navigates to /onboardingnext
   };
 
   return (

@@ -3,19 +3,71 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
+import { useEffect } from "react";
+import { usePageTracking } from "../hooks/usePageTracking";
 
 const wendyone = Wendy_One({
   weight: "400",
   subsets: ["latin"],
 });
 
+
+
 const QuizPage: React.FC = () => {
   const router = useRouter();
+  usePageTracking('/quiz');  // This tracks the quiz page
 
   const handleClick = () => {
     router.push("/question1"); // Navigates to /start
   };
+  const getUniqueUserId = () => {
+    let userId = localStorage.getItem('uniqueUserId');
+    return userId;
+  };
+  const userId = getUniqueUserId();  // Get or create a unique user ID
 
+  useEffect(() => {
+    const userId = getUniqueUserId();  // Get or create a unique user ID
+    const deviceType = navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop';
+    const channel = document.referrer.includes('google') ? 'organic' : 'direct';
+    
+    // Measure page load response time
+    const startTime = performance.now();
+
+    const sendPageView = () => {
+      const responseTime = performance.now() - startTime; // Calculate response time
+      fetch('/api/page-views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Start Game Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+
+      fetch('/api/page-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Start Game Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+    };
+
+    // Debounce the call to avoid multiple requests
+    const timeoutId = setTimeout(sendPageView, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
   return (
     <>
       <Head>

@@ -3,30 +3,98 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
+import { useEffect } from "react";
+import { usePageTracking } from "../hooks/usePageTracking";
 
 const wendyone = Wendy_One({
   weight: "400",
   subsets: ["latin"],
 });
 
+const getUniqueUserId = () => {
+  let userId = localStorage.getItem('uniqueUserId');
+  return userId;
+};
+const userId = getUniqueUserId();  // Get or create a unique user ID
+
+
 const QuizPage: React.FC = () => {
   const router = useRouter();
+  usePageTracking('/question4');  // This tracks the question4 page
 
   const handleOptionClick = (option: string) => {
     let numbersToSave: number[] = [];
+    let answer='';
 
     if (option === 'Option 1') {
       // Save numbers 1, 3, 6 for Option 1
       numbersToSave = [5,7];
+      answer='The emotional expression of the poetry';
     } else if (option === 'Option 2') {
       // Save numbers 2, 4, 9 for Option 2
       numbersToSave = [2, 4, 6,8];
+      answer='The emotional expression of the poetry';
     }
-
     // Store the selected numbers in localStorage
     localStorage.setItem('question4', JSON.stringify(numbersToSave));
-    router.push("/question5"); // Navigate to the next page
+
+   // Send response to the backend
+   fetch('/api/question-response', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId,  // Replace with the actual userId
+      questionId: 'If the dog gradually becomes independent and no longer hides behind you when scared, how do you feel?',
+      selectedAnswer: answer
+    }),
+  });
+
+  router.push("/question5");
+};
+
+// Page view tracking
+useEffect(() => {
+  const userId = getUniqueUserId();  // Get or create a unique user ID
+  const deviceType = navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop';
+  const channel = document.referrer.includes('google') ? 'organic' : 'direct';
+  
+  // Measure page load response time
+  const startTime = performance.now();
+
+  const sendPageView = () => {
+    const responseTime = performance.now() - startTime; // Calculate response time
+    fetch('/api/page-views', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        page: 'Question 4 Page',
+        deviceType,
+        channel,
+        responseTime, // Include the response time
+      }),
+    });
+
+    fetch('/api/page-response', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        page: 'Question 4 Page',
+        deviceType,
+        channel,
+        responseTime, // Include the response time
+      }),
+    });
   };
+
+  // Debounce the call to avoid multiple requests
+  const timeoutId = setTimeout(sendPageView, 300);
+
+  return () => {
+    clearTimeout(timeoutId);
+  };
+}, []);
 
   return (
     <>

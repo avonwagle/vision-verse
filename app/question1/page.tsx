@@ -3,32 +3,93 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
+import { useEffect } from "react";
 
 const wendyone = Wendy_One({
   weight: "400",
   subsets: ["latin"],
 });
+const getUniqueUserId = () => {
+  let userId = localStorage.getItem('uniqueUserId');
+  return userId;
+};
+const userId = getUniqueUserId();  // Get or create a unique user ID
 
 const QuizPage: React.FC = () => {
   const router = useRouter();
-
   const handleOptionClick = (option: string) => {
 
     let numbersToSave: number[] = [];
-
+    let answer='';
+  
     if (option === 'Option 1') {
-      // Save numbers 1, 3, 5, 6 for Option 1
       numbersToSave = [1, 3, 5, 6];
+      answer='Obedient and easy to train';
     } else if (option === 'Option 2') {
-      // Save numbers 2, 7, 8, 9 for Option 2
       numbersToSave = [2, 7, 8, 9];
+      answer='Friendly and sociable';
     }
-
+  
     // Store the selected option in localStorage
     localStorage.setItem('question1', JSON.stringify(numbersToSave));
-    router.push("/question2"); // Navigate to the next page
+  
+    // Send response to the backend
+    fetch('/api/question-response', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,  // Replace with the actual userId
+        questionId: 'You Hope To Choose A Dog As A Family Member. What Aspect Do You Value More?',
+        selectedAnswer: answer
+      }),
+    });
+  
+    router.push("/question2");
   };
+  
+  // Page view tracking
+  useEffect(() => {
+    const userId = getUniqueUserId();  // Get or create a unique user ID
+    const deviceType = navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop';
+    const channel = document.referrer.includes('google') ? 'organic' : 'direct';
+    
+    // Measure page load response time
+    const startTime = performance.now();
 
+    const sendPageView = () => {
+      const responseTime = performance.now() - startTime; // Calculate response time
+      fetch('/api/page-views', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Question 1 Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+
+      fetch('/api/page-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          page: 'Question 1 Page',
+          deviceType,
+          channel,
+          responseTime, // Include the response time
+        }),
+      });
+    };
+
+    // Debounce the call to avoid multiple requests
+    const timeoutId = setTimeout(sendPageView, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
   return (
     <>
       <Head>

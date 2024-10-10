@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
+import { useEffect } from "react";
+import { usePageTracking } from "../hooks/usePageTracking";
 
 // Define the Wendy One font
 const wendyone = Wendy_One({
@@ -10,22 +12,88 @@ const wendyone = Wendy_One({
   subsets: ["latin"],
 });
 
+const getUniqueUserId = () => {
+  let userId = localStorage.getItem('uniqueUserId');
+  return userId;
+};
+const userId = getUniqueUserId();  // Get or create a unique user ID
+
+
 // You can't use `Poetsen One` directly from `next/font` but you can include it from Google Fonts
 const QuizPage: React.FC = () => {
   const router = useRouter();
+  usePageTracking('/question5');  // This tracks the question5 page
 
   const handleOptionClick = (option: string) => {
     let numbersToSave: number[] = [];
+    let answer='';
 
     if (option === "Option 1") {
       numbersToSave = [1, 3, 6, 8];
+      answer='Able to obey commands';
     } else if (option === "Option 2") {
       numbersToSave = [4, 5, 7];
+      answer='Freely exploring the surroundings';
     }
-
     localStorage.setItem("question5", JSON.stringify(numbersToSave));
-    router.push("/question6");
+
+   // Send response to the backend
+   fetch('/api/question-response', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId,  // Replace with the actual userId
+      questionId: 'When you want to take your dog for a walk and play outside together, what condition do you prefer?',
+      selectedAnswer: answer
+    }),
+  });
+
+  router.push("/question6");
+};
+
+// Page view tracking
+useEffect(() => {
+  const userId = getUniqueUserId();  // Get or create a unique user ID
+  const deviceType = navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop';
+  const channel = document.referrer.includes('google') ? 'organic' : 'direct';
+  
+  // Measure page load response time
+  const startTime = performance.now();
+
+  const sendPageView = () => {
+    const responseTime = performance.now() - startTime; // Calculate response time
+    fetch('/api/page-views', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        page: 'Question 5 Page',
+        deviceType,
+        channel,
+        responseTime, // Include the response time
+      }),
+    });
+
+    fetch('/api/page-response', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        page: 'Question 5 Page',
+        deviceType,
+        channel,
+        responseTime, // Include the response time
+      }),
+    });
   };
+
+  // Debounce the call to avoid multiple requests
+  const timeoutId = setTimeout(sendPageView, 300);
+
+  return () => {
+    clearTimeout(timeoutId);
+  };
+}, []);
 
   return (
     <>
