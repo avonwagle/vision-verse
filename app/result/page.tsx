@@ -16,27 +16,47 @@ const getUniqueUserId = () => {
   return localStorage.getItem('uniqueUserId');
 };
 
+// Helper function to get the selected language from localStorage
+const getLanguage = (): "English" | "Chinese" => {
+  const lang = localStorage.getItem('language');
+  return lang === "Chinese" ? "Chinese" : "English"; // Default to English if not Chinese
+};
+
 // Priority order for resolving ties in occurrences
 const priorityOrder = [9, 6, 4, 7, 3, 1, 2, 8, 5];
 
-// Map numbers to image paths for displaying result images
-const imageMap: Record<number, string> = {
-  1: "/output/option1.png",
-  2: "/output/option2.png",
-  3: "/output/option3.png",
-  4: "/output/option4.png",
-  5: "/output/option5.png",
-  6: "/output/option6.png",
-  7: "/output/option7.png",
-  8: "/output/option8.png",
-  9: "/output/option9.png",
+// Image map for both English and Chinese languages
+const imageMapByLanguage: Record<"English" | "Chinese", Record<number, string>> = {
+  English: {
+    1: "/output/option1.png",
+    2: "/output/option2.png",
+    3: "/output/option3.png",
+    4: "/output/option4.png",
+    5: "/output/option5.png",
+    6: "/output/option6.png",
+    7: "/output/option7.png",
+    8: "/output/option8.png",
+    9: "/output/option9.png",
+  },
+  Chinese: {
+    1: "/output/option1_ch.png",
+    2: "/output/option2_ch.png",
+    3: "/output/option3_ch.png",
+    4: "/output/option4_ch.png",
+    5: "/output/option5_ch.png",
+    6: "/output/option6_ch.png",
+    7: "/output/option7_ch.png",
+    8: "/output/option8_ch.png",
+    9: "/output/option9_ch.png",
+  },
 };
+
 
 // Map numbers to output names
 const outputNameMap: Record<number, string> = {
   1: "Border Collie - Perfectionist",
   2: "Golden Retriever - Helper",
-  3: "Poolde - Achiever",
+  3: "Poodle - Achiever",
   4: "Samoyed - Individualist",
   5: "Alaskan Malamute - Investigator",
   6: "Shiba Inu - Loyalist",
@@ -49,8 +69,8 @@ const ResultPage: React.FC = () => {
   const [selectedOptions, setSelectedOptions] = useState<number[][]>([]);
   const [occurrences, setOccurrences] = useState<Record<number, number>>({});
   const [highestOccurrenceNumber, setHighestOccurrenceNumber] = useState<number | null>(null);
-  const [showMoreResults, setShowMoreResults] = useState<boolean>(false); // Toggle visibility for "more results"
-  const [showModal, setShowModal] = useState<boolean>(false); // Toggle modal visibility for share options
+  const [showMoreResults, setShowMoreResults] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   const router = useRouter();
   usePageTracking('/more-results');  // Track page view
@@ -128,18 +148,6 @@ const ResultPage: React.FC = () => {
           responseTime, // Include the response time
         }),
       });
-
-      fetch('/api/page-response', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          page: 'Result Page',
-          deviceType,
-          channel,
-          responseTime, // Include the response time
-        }),
-      });
     };
 
     // Debounce the call to avoid multiple requests
@@ -150,8 +158,27 @@ const ResultPage: React.FC = () => {
     };
   }, []);
 
-  // Determine the result image based on the highest occurrence number
-  const imageSrc = highestOccurrenceNumber ? imageMap[highestOccurrenceNumber] : "/images/quiz8.png";
+  const language = getLanguage();
+  // Determine the result image based on the highest occurrence number and language
+  const imageSrc = highestOccurrenceNumber
+  ? imageMapByLanguage[language][highestOccurrenceNumber]
+  : "/images/quiz8.png"; // Default fallback
+
+  // Define which numbers correspond to 8 or 6 images
+  const showEightImages = [1, 2, 4, 5, 8].includes(highestOccurrenceNumber ?? -1);
+  const showSixImages = [3, 6, 7, 9].includes(highestOccurrenceNumber ?? -1);
+
+  // Array of image objects containing image source and corresponding text
+  const imageItems = [
+    { src: "/banner/DogBed1.png", text: "DOG  BED" },
+    { src: "/banner/DogBed2.png", text: "DOG BED" },
+    { src: "/banner/Chewable.png", text: "CHEWABLES" },
+    { src: "/banner/nailGrinder.png", text: "NAIL GRINDER" },
+    { src: "/banner/dogToy.png", text: "DOG TOY" },
+    { src: "/banner/TrainingCollar.png", text: "TRAINING COLLAR" },
+    { src: "/banner/WideDogGates.png", text: "WIDE DOG GATES" },
+    { src: "/banner/dogRamp.png", text: "DOG RAMP" },
+  ];
 
   // Function to download the image (for Instagram sharing)
   const handleDownload = () => {
@@ -209,60 +236,74 @@ const ResultPage: React.FC = () => {
           rel="stylesheet"
         />
       </Head>
-      <div className="relative min-h-screen items-center flex flex-col bg-green-500 justify-between overflow-hidden">
-        {/* Top Section: Content and Buttons */}
-        <div className="relative flex-grow w-full max-w-md bg-white shadow-md flex flex-col">
-          <div className="relative flex-grow">
+      <div className="relative min-h-screen flex flex-col bg-green-500 justify-between overflow-hidden items-center">
+        {/* Scrollable content container */}
+        <div className="flex-grow w-full max-w-md bg-[#070A2E] shadow-md overflow-y-scroll">
+          <div className="relative w-full flex flex-col">
             <img
               src={imageSrc} // Set the result image dynamically
               alt="Quiz"
-              className="absolute inset-0 w-full h-full"
+              className="w-full h-full"
             />
-            <div className="absolute inset-0 flex flex-col justify-center items-center p-6 mt-60">
-              <div className="text-center text-white space-y-6 pt-20">
-                {/* You can add any additional content here */}
-              </div>
-            </div>
           </div>
 
-          {/* Buttons at the bottom of the top section */}
-          <div className="absolute bottom-0 w-full flex justify-around items-center p-4 -mb-4">
+ {/* Bottom section with buttons */}
+ <div className="w-full flex justify-around items-center p-4 bg-[#070A2E]">
             <button
               onClick={() => setShowModal(true)}
-              className="border border-white text-white px-7 py-2 rounded-full bg-transparent hover:bg-white hover:text-green-500 transition-colors"
+              className="border border-gray-300 text-white px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
             >
               Share
             </button>
             <button
               onClick={handleRestart}
-              className="border border-white text-white px-4 py-2 rounded-full bg-transparent hover:bg-white hover:text-green-500 transition-colors"
+              className="border border-gray-300 text-white px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
             >
               Play Again
             </button>
             <button
-              onClick={() => router.push("/more-results")}  // Navigate to another page
-              className="border border-white text-white px-4 py-2 rounded-full bg-transparent hover:bg-white hover:text-green-500 transition-colors"
+              onClick={() => router.push("/more-results")}
+              className="border border-gray-300 text-white px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
             >
               {showMoreResults ? "Hide Results" : "More Results"}
             </button>
           </div>
-        </div>
+          {/* Display images and text, one image per row */}
+          <div className="mt-4 flex flex-col gap-4 p-4 bg-[#070A2E]">
+            {showEightImages &&
+              imageItems.slice(0, 8).map((item, index) => (
+                <div key={index} className="relative flex flex-col items-center p-0 rounded-lg shadow-md overflow-hidden">
+                  {/* Image: Full width, position relative to contain text */}
+                  <img
+                    src={item.src}
+                    alt={`Image ${index + 1}`}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                  {/* Text: Positioned at the bottom, overlapping the image */}
+                  <div className="absolute bottom-0 w-full bg-black bg-opacity-60 text-white text-center py-2 rounded-b-3xl">
+                    <p className="text-center text-xl font-bold">{item.text}</p>
+                  </div>
+                </div>
+              ))}
 
-        {/* Bottom Section: Image Container with Link */}
-        <div className="relative w-full max-w-md shadow-md p-4 bg-[#070A2E]">
-          {/* Image container with link */}
-          <a
-            href="https://your-link-url.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full"
-          >
-            <img
-              src="/output/perfume.png"
-              alt="Ad"
-              className="w-full h-40 object-contain rounded-lg shadow-lg"
-            />
-          </a>
+            {showSixImages &&
+              imageItems.slice(0, 6).map((item, index) => (
+                <div key={index} className="relative flex flex-col items-center p-0 rounded-lg shadow-md overflow-hidden">
+                  {/* Image: Full width, position relative to contain text */}
+                  <img
+                    src={item.src}
+                    alt={`Image ${index + 1}`}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                  {/* Text: Positioned at the bottom, overlapping the image */}
+                  <div className="absolute bottom-0 w-full bg-black bg-opacity-60 text-white text-center py-2 rounded-b-3xl">
+                  <p className="text-center text-xl font-bold">{item.text}</p>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+         
         </div>
 
         {/* Modal for selecting the sharing platform */}

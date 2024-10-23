@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import translations from "../components/translations"; // Import translations
 import { usePageTracking } from "../hooks/usePageTracking";
 
 const wendyone = Wendy_One({
@@ -17,52 +18,59 @@ const getUniqueUserId = () => {
 };
 const userId = getUniqueUserId();  // Get or create a unique user ID
 
+const getLanguageFromLocalStorage = () => {
+  return localStorage.getItem('language') as 'English' | 'Chinese' || 'English';  // Default to English if not set
+};
 
 const QuizPage: React.FC = () => {
+  const [language, setLanguage] = useState<'English' | 'Chinese'>('English'); // State for language
   const router = useRouter();
+  
+  useEffect(() => {
+    setLanguage(getLanguageFromLocalStorage()); // Get the selected language from localStorage
+  }, []);
+
   usePageTracking('/question3');  // This tracks the question3 page
 
   const handleOptionClick = (option: string) => {
-    // Store the selected option in localStorage
     let numbersToSave: number[] = [];
-    let answer='';
+    let answer = '';
+
     if (option === 'Option 1') {
-      // Save numbers 1, 3, 8 for Option 1
       numbersToSave = [1, 3, 8];
-      answer='Strict training and guidance';
+      answer='Strict training and guidance';  
     } else if (option === 'Option 2') {
-      // Save numbers 4,5,7 for Option 2
-      numbersToSave = [4,5,7];
+      numbersToSave = [4, 5, 7];
       answer='Learning through games';
     }
 
     // Store the selected numbers in localStorage
     localStorage.setItem('question3', JSON.stringify(numbersToSave));
+
     // Send response to the backend
     fetch('/api/question-response', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userId,  // Replace with the actual userId
+        userId,  
         questionId: 'You are ready to start training your dog. Which method do you prefer?',
-        selectedAnswer: answer
+        selectedAnswer: answer,
       }),
     });
-  
+
     router.push("/question4");
   };
-  
+
   // Page view tracking
   useEffect(() => {
-    const userId = getUniqueUserId();  // Get or create a unique user ID
+    const userId = getUniqueUserId();  
     const deviceType = navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop';
     const channel = document.referrer.includes('google') ? 'organic' : 'direct';
     
-    // Measure page load response time
     const startTime = performance.now();
 
     const sendPageView = () => {
-      const responseTime = performance.now() - startTime; // Calculate response time
+      const responseTime = performance.now() - startTime; 
       fetch('/api/page-views', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,7 +79,7 @@ const QuizPage: React.FC = () => {
           page: 'Question 3 Page',
           deviceType,
           channel,
-          responseTime, // Include the response time
+          responseTime, 
         }),
       });
 
@@ -83,12 +91,11 @@ const QuizPage: React.FC = () => {
           page: 'Question 3 Page',
           deviceType,
           channel,
-          responseTime, // Include the response time
+          responseTime, 
         }),
       });
     };
 
-    // Debounce the call to avoid multiple requests
     const timeoutId = setTimeout(sendPageView, 300);
 
     return () => {
@@ -108,7 +115,7 @@ const QuizPage: React.FC = () => {
         <div className="relative w-full max-w-md h-screen bg-white shadow-md overflow-hidden flex flex-col">
           <div className="relative flex-grow">
             <img
-              src="/images/quiz3.png" // Make sure this image exists in your public folder
+              src="/images/quiz3.png" 
               alt="Quiz"
               className="w-full h-full object-cover"
             />
@@ -120,8 +127,7 @@ const QuizPage: React.FC = () => {
               
               <div className="text-center text-white space-y-6 -mt-20">
                 <h2 className={`text-2xl font-bold poetsen-one-regular`} style={{ fontSize: '1.4rem', }}>
-                                  You are ready to start training your dog. Which method do you prefer?         
-
+                  {translations[language].quiz3.question}  {/* Display translated question */}
                 </h2>
               </div>
 
@@ -131,20 +137,18 @@ const QuizPage: React.FC = () => {
                   <div
                     onClick={() => handleOptionClick("Option 1")}
                     className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
-                                     >
-                    <p>Strict training and guidance</p>
+                  >
+                    <p>{translations[language].quiz3.option1}</p>  {/* Display translated option 1 */}
                   </div>
                   <div
                     onClick={() => handleOptionClick("Option 2")}
                     className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
-                                      >
-                    <p>Learning through games</p>
+                  >
+                    <p>{translations[language].quiz3.option2}</p>  {/* Display translated option 2 */}
                   </div>
                 </div>
               </div>
             </div>
-
-           
           </div>
         </div>
       </div>

@@ -2,16 +2,25 @@
 "use client";
 import { useRouter } from "next/navigation";
 import Head from "next/head";
-import { useEffect } from "react";
-
 import { Wendy_One } from "next/font/google";
+import { useEffect, useState } from "react";
+import translations from "../components/translations"; // Import translations
 import "../globals.css";
 import { usePageTracking } from "../hooks/usePageTracking";
 
+// Font configuration
 const wendyone = Wendy_One({
   weight: "400",
   subsets: ["latin"],
 });
+
+// Helper function to get language from localStorage
+const getLanguageFromLocalStorage = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('language') as 'English' | 'Chinese' || 'English'; // Default to English
+  }
+  return 'English'; // Fallback for SSR
+};
 
 const getUniqueUserId = () => {
   let userId = localStorage.getItem('uniqueUserId');
@@ -19,7 +28,17 @@ const getUniqueUserId = () => {
 };
 
 const StartPage: React.FC = () => {
+  const [language, setLanguage] = useState<'English' | 'Chinese'>('English'); // Default language
   const router = useRouter();
+
+  usePageTracking('/onboarding');  // This tracks the quiz page
+
+
+  // Load language on component mount
+  useEffect(() => {
+    const storedLanguage = getLanguageFromLocalStorage();
+    setLanguage(storedLanguage);
+  }, []);
 
   useEffect(() => {
     const userId = getUniqueUserId();  // Get or create a unique user ID
@@ -64,7 +83,6 @@ const StartPage: React.FC = () => {
     };
   }, []);
 
-
   const handleClick = () => {
     router.push("/onboardingnext"); // Navigates to /onboardingnext
   };
@@ -96,24 +114,24 @@ const StartPage: React.FC = () => {
             <div className="absolute inset-0 flex flex-col justify-center items-center p-4 space-y-4">
               {/* Main Title positioned at the top */}
               <div className="absolute top-16">
-                <h1 className="text-3xl font-bold text-white poetsen-one-regular">
-                  How to play
+                <h1 className={`text-3xl font-bold text-white poetsen-one-regular`}>
+                  {translations[language].onboarding.title}
                 </h1>
               </div>
 
               {/* Instruction Text with gaps between title and text */}
               <div className="mt-20 flex flex-col items-center space-y-6">
                 <p className="text-md text-white text-center px-2">
-                  According to your preference, choose the corresponding option. (Hint: The more intuitive, the better.)
+                  {translations[language].onboarding.instruction}
                 </p>
 
                 {/* First SVG Image and text */}
                 <img src="/images/top_onboard.png" alt="Instruction 1" className="w-50 h-56" />
-                <p className="text-sm text-white -mt-20">Single Choice Question</p>
+                <p className="text-sm text-white -mt-20">{translations[language].onboarding.singleChoice}</p>
 
                 {/* Second SVG Image and text */}
                 <img src="/images/bottom_onboard.png" alt="Instruction 2" className="w-50 h-56 mt-10" />
-                <p className="text-sm text-white mt-2">Multiple Choice Question</p>
+                <p className="text-sm text-white mt-2">{translations[language].onboarding.multipleChoice}</p>
               </div>
 
               {/* Final SVG Image */}

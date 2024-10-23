@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePageTracking } from "../hooks/usePageTracking";
+import translations from "../components/translations"; // Import translations
 
 // Define the Wendy One font
 const wendyone = Wendy_One({
@@ -12,21 +13,30 @@ const wendyone = Wendy_One({
   subsets: ["latin"],
 });
 
+// Utility to get unique user ID from localStorage
 const getUniqueUserId = () => {
   let userId = localStorage.getItem('uniqueUserId');
   return userId;
 };
 const userId = getUniqueUserId();  // Get or create a unique user ID
 
+// Utility to get language from localStorage
+const getLanguageFromLocalStorage = () => {
+  return localStorage.getItem('language') as 'English' | 'Chinese' || 'English';  // Default to English if not set
+};
 
-// You can't use `Poetsen One` directly from `next/font` but you can include it from Google Fonts
 const QuizPage: React.FC = () => {
+  const [language, setLanguage] = useState<'English' | 'Chinese'>('English');  // State to store selected language
   const router = useRouter();
   usePageTracking('/question5');  // This tracks the question5 page
 
+  useEffect(() => {
+    setLanguage(getLanguageFromLocalStorage());  // Set language based on localStorage
+  }, []);
+
   const handleOptionClick = (option: string) => {
     let numbersToSave: number[] = [];
-    let answer='';
+    let answer = '';
 
     if (option === "Option 1") {
       numbersToSave = [1, 3, 6, 8];
@@ -42,7 +52,7 @@ const QuizPage: React.FC = () => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      userId,  // Replace with the actual userId
+      userId,
       questionId: 'When you want to take your dog for a walk and play outside together, what condition do you prefer?',
       selectedAnswer: answer
     }),
@@ -98,7 +108,6 @@ useEffect(() => {
   return (
     <>
       <Head>
-       
         <link
           href="https://fonts.googleapis.com/css2?family=Wendy+One&display=swap"
           rel="stylesheet"
@@ -120,7 +129,7 @@ useEffect(() => {
               
               <div className="text-center text-white space-y-6 -mt-20">
                 <h2 className={`text-2xl font-bold poetsen-one-regular`} style={{ fontSize: '1.4rem', }}>
-                  When you want to take your dog for a walk and play outside together, what condition do you prefer?
+                  {translations[language].quiz5.question}  {/* Display translated question */}
                 </h2>
               </div>
 
@@ -131,13 +140,13 @@ useEffect(() => {
                     onClick={() => handleOptionClick("Option 1")}
                     className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
                   >
-                    <p>Able to obey commands</p>
+                    <p>{translations[language].quiz5.option1}</p>  {/* Display translated option 1 */}
                   </div>
                   <div
                     onClick={() => handleOptionClick("Option 2")}
                     className="cursor-pointer p-4 bg-[#192E2B] border-2 border-yellow-100 rounded-2xl text-white text-center transition-colors duration-300 ease-in-out hover:bg-white hover:text-[#21322E] flex items-center justify-center option-button"
                   >
-                    <p>Freely exploring the surroundings</p>
+                    <p>{translations[language].quiz5.option2}</p>  {/* Display translated option 2 */}
                   </div>
                 </div>
               </div>

@@ -1,10 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const LanguageSelector: React.FC = () => {
   const [language, setLanguage] = useState<'English' | 'Chinese'>('English');
 
+  useEffect(() => {
+    const storedLanguage = localStorage.getItem('language') as 'English' | 'Chinese' | null;
+    if (storedLanguage) {
+      setLanguage(storedLanguage);
+    }
+  }, []);
+
   const handleLanguageChange = (lang: 'English' | 'Chinese') => {
     setLanguage(lang);
+    localStorage.setItem('language', lang);  // Store language in localStorage
+    console.log("selected language: ",lang)
+    window.dispatchEvent(new Event('languageChange'));  // Dispatch an event for language change
   };
 
   return (

@@ -1,9 +1,10 @@
-// File: pages/start.tsx
+// File: pages/quiz.tsx
 "use client";
 import { useRouter } from "next/navigation";
 import Head from "next/head";
 import { Wendy_One } from "next/font/google";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import translations from "../components/translations"; // Import translations
 import { usePageTracking } from "../hooks/usePageTracking";
 
 const wendyone = Wendy_One({
@@ -11,19 +12,35 @@ const wendyone = Wendy_One({
   subsets: ["latin"],
 });
 
-
+// Helper function to get language from localStorage
+const getLanguageFromLocalStorage = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('language') as 'English' | 'Chinese' || 'English'; // Default to English
+  }
+  return 'English'; // Fallback for SSR
+};
 
 const QuizPage: React.FC = () => {
   const router = useRouter();
+  const [language, setLanguage] = useState<'English' | 'Chinese'>('English'); // Default language
+
   usePageTracking('/quiz');  // This tracks the quiz page
 
+  // Load language on component mount
+  useEffect(() => {
+    const storedLanguage = getLanguageFromLocalStorage();
+    setLanguage(storedLanguage);
+  }, []);
+
   const handleClick = () => {
-    router.push("/question1"); // Navigates to /start
+    router.push("/question1"); // Navigates to /question1
   };
+
   const getUniqueUserId = () => {
     let userId = localStorage.getItem('uniqueUserId');
     return userId;
   };
+
   const userId = getUniqueUserId();  // Get or create a unique user ID
 
   useEffect(() => {
@@ -68,6 +85,7 @@ const QuizPage: React.FC = () => {
       clearTimeout(timeoutId);
     };
   }, []);
+
   return (
     <>
       <Head>
@@ -88,31 +106,23 @@ const QuizPage: React.FC = () => {
             <div className="absolute inset-0 flex flex-col justify-center items-center">
               <div className="text-center text-white space-y-6 pt-20">
                 <h1 className={`text-5xl font-bold ${wendyone.className}`}>
-                Discover Your  
-                  <br />
-                  Scent-Based
-                  <br />
-                  Personality
+                  {translations[language].quiz.title}
                 </h1>
               </div>
               
               <div className="text-center text-white space-y-6 mt-32 mr-20">
                 <h1 className={`text-3xl font-bold ${wendyone.className}`}>
-                Qs  
-              
+                  {translations[language].quiz.questions}
                 </h1>
               </div>
               <div className="text-center text-white space-y-6 mt-2">
                 <h1 className={`text-8xl font-bold ${wendyone.className}`}>
-                
-                8
-                  
+                  {translations[language].quiz.totalQuestions}
                 </h1>
               </div>
               <div className="text-center text-white space-y-6 mt-10">
                 <h1 className={`text-3xl font-bold ${wendyone.className}`}>
-              
-                Tap To Start
+                  {translations[language].quiz.startButton}
                 </h1>
               </div>
             </div>
